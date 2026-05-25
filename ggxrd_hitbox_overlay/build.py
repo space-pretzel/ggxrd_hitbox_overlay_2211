@@ -127,7 +127,7 @@ else:
           " -fpermissive"
  if not is_debug:
   # try removing some optimization flags if the build doesn't work
-  CFLAGS += " --optimize -flto -fuse-linker-plugin -fno-fat-lto-objects"
+  CFLAGS += " --optimize -flto=auto -fuse-linker-plugin -fno-fat-lto-objects"
  CFLAGS += " " + " ".join(ignored_warnings)
 print(f"Will use CFLAGS={CFLAGS}.")
 

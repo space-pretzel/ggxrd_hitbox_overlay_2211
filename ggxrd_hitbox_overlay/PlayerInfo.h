@@ -2314,6 +2314,7 @@ struct PlayerInfo {
 	bool wasPrevFrameEnableSpecials:1;
 	bool wasEnableSpecialCancel:1;
 	bool wasClashCancelTimer:1;
+	bool wasPrevFrameEnableJumpCancel:1;
 	bool wasEnableJumpCancel:1;
 	bool wasEnableAirtech:1;
 	bool wasCanYrc:1;

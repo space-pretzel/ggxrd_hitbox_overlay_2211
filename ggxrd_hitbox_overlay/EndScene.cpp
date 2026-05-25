@@ -3184,6 +3184,7 @@ void EndScene::frameCleanup() {
 			player.wasEnableSpecials = false;
 			player.wasEnableSpecialCancel = false;
 			player.wasClashCancelTimer = false;
+			player.wasPrevFrameEnableJumpCancel = player.wasEnableJumpCancel;
 			player.wasEnableJumpCancel = false;
 			player.wasSuperArmorEnabled = false;
 			player.wasFullInvul = false;
@@ -4282,7 +4283,9 @@ BOOL EndScene::skillCheckPieceHook(Entity pawn) {
 				: player.wasEnableSpecials && pawn.currentAnimDuration() != 1 || pawn.enableSpecials();
 			player.wasEnableSpecialCancel = player.wasEnableSpecialCancel && pawn.currentAnimDuration() != 1 || pawn.enableSpecialCancel();
 			player.wasClashCancelTimer = player.wasClashCancelTimer && pawn.currentAnimDuration() != 1 || pawn.clashCancelTimer() > 0;
-			player.wasEnableJumpCancel = player.wasEnableJumpCancel && pawn.currentAnimDuration() != 1 || pawn.enableJumpCancel() && pawn.attackCollidedSoCanJumpCancelNow();
+			player.wasEnableJumpCancel = pawn.isRCFrozen()
+				? player.wasPrevFrameEnableJumpCancel
+				: player.wasEnableJumpCancel && pawn.currentAnimDuration() != 1 || pawn.enableJumpCancel() && pawn.attackCollidedSoCanJumpCancelNow();
 			player.wasAttackCollidedSoCanCancelNow = player.wasAttackCollidedSoCanCancelNow && pawn.currentAnimDuration() != 1 || pawn.attackCollidedSoCanCancelNow();
 			player.wasEnableAirtech = player.wasEnableAirtech && pawn.currentAnimDuration() != 1 || pawn.enableAirtech();
 			player.wasForceDisableFlags = pawn.isRCFrozen() ? player.wasPrevFrameForceDisableFlags : pawn.forceDisableFlags();

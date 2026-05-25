@@ -4496,7 +4496,7 @@ void PlayerInfo::determineCancelDelay(CancelDelay* result) const {
 				}
 			} else if (
 					(timeSinceWasEnableSpecialCancel || timeSinceWasEnableSpecials)
-					&& pawn.dealtAttack()->type >= ATTACK_TYPE_EX
+					&& pawn.currentMove()->type == MOVE_TYPE_SPECIAL
 					&& timeSinceWasEnableSpecialCancel
 			) {
 				result->delay = timeSinceWasEnableSpecialCancel;

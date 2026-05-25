@@ -1468,19 +1468,19 @@ void EndScene::prepareDrawDataInside() {
 					player.lastPerformedMoveNameIsInComboRecipe = false;
 					
 					player.timePassedInNonFrozenFramesSinceStartOfAnim = 0;
-					player.delayLastMoveWasCancelledIntoWith = 0;
 					
 					player.lastMoveWasJumpInstalled = jumpInstalledStage2;
 					player.lastMoveWasSuperJumpInstalled = superJumpInstalledStage2;
-					
-					player.timeSinceWasEnableSpecialCancel = 0;
-					player.timeSinceWasEnableSpecials = 0;
 					
 					player.moveStartTime_aswEngineTick = aswEngineTickCount;
 					PlayerInfo::CancelDelay cancelDelay;
 					player.determineCancelDelay(&cancelDelay);
 					player.delayLastMoveWasCancelledIntoWith = cancelDelay.delay;
 					player.delayInTheLastMoveIsAfterIdle = cancelDelay.isAfterIdle;
+					
+					player.timeSinceWasEnableSpecialCancel = 0;
+					player.timeSinceWasEnableSpecials = 0;
+					
 				}
 				if (player.move.preservesNewSection) {
 					// must clear this at the end, because we use this in PlayerInfo::determineCancelDelay
@@ -4277,6 +4277,7 @@ void EndScene::prepareDrawDataInside() {
 			
 			if (framebarAdvancedIdleHitstop) {
 				currentFrame.newHit = framebar.stateHead->requestNextHit;
+				framebar.stateHead->requestNextHit = false;
 			}
 			
 			if (&entityFramebar != &defaultFramebar) {
@@ -4288,7 +4289,7 @@ void EndScene::prepareDrawDataInside() {
 			}
 			
 		}
-			
+		
 		if (framebarAdvancedIdleHitstop) {
 			for (ThreadUnsafeSharedPtr<ProjectileFramebar>& entityFramebar : projectileFramebars) {
 				if (entityFramebar->foundOnThisFrame) continue;
