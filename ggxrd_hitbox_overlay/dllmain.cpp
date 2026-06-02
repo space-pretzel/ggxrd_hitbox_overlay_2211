@@ -29,7 +29,9 @@ static void closeLog();
 #define closeLog()
 #endif
 static bool initialized = false;
+#ifdef WITH_OBS_DODGING
 static HMODULE obsDll = NULL;
+#endif
 HMODULE hInst = NULL;
 
 
@@ -171,9 +173,11 @@ BOOL APIENTRY DllMain( HMODULE hModule,
 			terminate
 		}
 		
+		#ifdef WITH_OBS_DODGING
 		obsDll = GetModuleHandleA("graphics-hook32.dll");
 		//if (obsDll) graphics.imInDanger = true;
 		if (obsDll) graphics.obsModuleSpotted = true;
+		#endif
 		
 		// the list of moves is needed for the settings reader. moves.onDllMain() must not perform sigscan
 		if (!moves.onDllMain()) terminate
@@ -281,6 +285,7 @@ BOOL APIENTRY DllMain( HMODULE hModule,
 		closeLog();
 		break;
 	case DLL_THREAD_ATTACH:
+		#ifdef WITH_OBS_DODGING
 		if (!obsDll) {
 			obsDll = GetModuleHandleA("graphics-hook32.dll");
 			if (obsDll) {
@@ -312,6 +317,7 @@ BOOL APIENTRY DllMain( HMODULE hModule,
 				//}
 			}
 		}
+		#endif
 		break;
 	}
 	return TRUE;

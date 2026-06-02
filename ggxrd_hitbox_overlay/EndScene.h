@@ -121,8 +121,10 @@ struct DrawBoxesRenderCommand : FRenderCommand {
 	virtual unsigned int Execute() override;  // Runs on the graphics thread
 	virtual const wchar_t* DescribeCommand() noexcept override;
 	DrawBoxesRenderCommand();  // Runs on the main thread
+	#ifdef WITH_OBS_DODGING
 	bool drawingPostponed;
 	bool obsStoppedCapturing;
+	#endif
 	DrawData drawData;
 	CameraValues cameraValues;
 	bool noNeedToDrawPoints;
@@ -139,8 +141,10 @@ struct DrawBoxesRenderCommand : FRenderCommand {
 struct UiOrFramebarDrawData {
 	UiOrFramebarDrawData(bool calledFromDrawOriginPointsRenderCommand);
 	std::vector<BYTE> drawData;
+	#ifdef WITH_OBS_DODGING
 	bool drawingPostponed = false;
 	bool obsStoppedCapturing = false;
+	#endif
 	BYTE* iconsUTexture2D = nullptr;
 	BYTE* staticFontTexture2D = nullptr;
 	CharInfo openParenthesis;
@@ -319,7 +323,9 @@ public:
 	int getTotalFramesUnlimited() const { return currentState->framebarTotalFramesUnlimited; }
 	int getTotalFramesHitstopUnlimited() const { return currentState->framebarTotalFramesHitstopUnlimited; }
 	bool willEnqueueAndDrawOriginPoints = false;
+	#ifdef WITH_OBS_DODGING
 	bool endSceneAndPresentHooked = false;
+	#endif
 	BBScr_getAccessedValueImpl_t BBScr_getAccessedValueImpl = nullptr;
 	BBScr_checkMoveConditionImpl_t BBScr_checkMoveConditionImpl = nullptr;
 	bool wasPlayerHadGatling(int playerIndex, const char* name);
@@ -334,9 +340,11 @@ public:
 	bool needDrawInputs = false;
 	const std::vector<SkippedFramesInfo>& getSkippedFrames(bool hitstop) const;
 	bool queueingFramebarDrawCommand = false;
-	bool drawingPostponed() const;
 	bool uiWillBeDrawnOnTopOfPauseMenu = false;
+	#ifdef WITH_OBS_DODGING
+	bool drawingPostponed() const;
 	bool obsStoppedCapturing = false;
+	#endif
 	setSuperFreezeAndRCSlowdownFlags_t orig_setSuperFreezeAndRCSlowdownFlags = nullptr;
 	bool needEnqueueUiWithPoints = false;
 	drawTrainingHudInputHistory_t orig_drawTrainingHudInputHistory = nullptr;

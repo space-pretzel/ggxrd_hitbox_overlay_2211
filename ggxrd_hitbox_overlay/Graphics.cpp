@@ -272,6 +272,7 @@ bool Graphics::onDllMain() {
 	return !error;
 }
 
+#ifdef WITH_OBS_DODGING
 bool Graphics::checkCanHookEndSceneAndPresent() {
 	HMODULE obsDll = GetModuleHandleA("graphics-hook32.dll");
 	if (!obsDll || obsDll == INVALID_HANDLE_VALUE) return false;
@@ -410,6 +411,7 @@ void Graphics::beginSceneHook(IDirect3DDevice9* device) {
 		
 	}
 }
+#endif
 // This function is called from the main thread.
 // It 'initializes the D3D device for the current viewport state.'
 void Graphics::HookHelp::UpdateD3DDeviceFromViewportsHook() {
@@ -475,13 +477,16 @@ void Graphics::onEndSceneStart(IDirect3DDevice9* device) {
 	this->device = device;
 	stencil.onEndSceneStart();
 	//graphics.receiveDanger();
+	#ifdef WITH_OBS_DODGING
 	checkAndHookBeginSceneAndPresent(false);
+	#endif
 }
 
 // Runs on the graphics thread
 void Graphics::onShutdown() {
 	resetHook();
 	ui.onDllDetachGraphics();
+	#ifdef WITH_OBS_DODGING
 	if (endSceneAndPresentHooked) {
 		const char* hooksToUndetour[] {
 			"BeginScene",
@@ -489,6 +494,7 @@ void Graphics::onShutdown() {
 		};
 		detouring.detachOnlyTheseHooks(hooksToUndetour, _countof(hooksToUndetour));
 	}
+	#endif
 	SetEvent(shutdownFinishedEvent);
 	//receiveDanger();
 }
@@ -1120,7 +1126,12 @@ void Graphics::drawAll() {
 	// a special command that draws only the points may also draw inputs
 	// this is caused by points needing to be drawn on top of the tension bars, while boxes are under the tension bar
 	// well, inputs also need to be on top of the tension bar so we lumped them into one FRenderCommand
-	if ((onlyDrawInputHistory || onlyDrawPoints || drawingPostponed())
+	if ((
+			onlyDrawInputHistory || onlyDrawPoints
+			#ifdef WITH_OBS_DODGING
+			|| drawingPostponed()
+			#endif
+		)
 			&& screenshotStage == SCREENSHOT_STAGE_NONE
 			&& (drawDataUse.inputsSize[0] || drawDataUse.inputsSize[1])
 			&& (onlyDrawInputHistory || !inputHistoryIsSplitOut)) {
@@ -2943,7 +2954,9 @@ void Graphics::heartbeat(IDirect3DDevice9* device) {
 	fillInScreenSize(device);
 	//receiveDanger();
 	afterDraw();
+	#ifdef WITH_OBS_DODGING
 	checkAndHookBeginSceneAndPresent(false);
+	#endif
 }
 
 void Graphics::cpuPixelBlenderComplex(void* gameImage, const void* boxesImage, int width, int height) {
@@ -3129,6 +3142,7 @@ void Graphics::afterDraw() {
 	}
 }
 
+#ifdef WITH_OBS_DODGING
 bool Graphics::canDrawOnThisFrame() const {
 	return !(
 		obsModuleSpotted
@@ -3142,6 +3156,7 @@ bool Graphics::canDrawOnThisFrame() const {
 bool Graphics::drawingPostponed() const {
 	return settings.dodgeObsRecording && endSceneAndPresentHooked && !obsStoppedCapturing;
 }
+#endif
 
 // Draw boxes, without UI, and take a screenshot if needed
 // Runs on the graphics thread

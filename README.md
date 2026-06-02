@@ -5,18 +5,18 @@
 ## Description
 
 Adds hitboxes overlaid on top of characters/projectiles for Guilty Gear Xrd Rev2 version 2211 (as of 12'th February 2025).  
-Adds framebar and framedata display (see [Framebar](#framebar) section).
+Adds framebar and framedata display (see [Framebar](#framebar) section).  
 Also can freeze the game and play it frame-by-frame (with box display turned off for example) (see main mod's UI window - Hitboxes section within the mod).  
 Also can screenshot the game with transparency enabled/disabled (made with help from WorseThanYou (visit his website! <https://worsety.github.io/>)).  
 Also contains position reset mod (see [Position Reset Mod](#position-reset-mod) section).  
 Also contains input history mod (see [Input History Mod](#input-history-mod) section) which can display input history when observing online matches, and it can display durations of each input in the input history.  
 Also it can hide the main Enter key or numpad Enter key presses from the game, or both (in General Settings).  
-Also it can hide wins on the rematch screen (see [Hide Wins Mod](#hide-wins-mod) section).
+Also it can hide wins on the rematch screen (see [Hide Wins Mod](#hide-wins-mod) section).  
 Also it can hide rank icons (circle, arrow up/down, equal sign) next to players (enable in General Settings).  
 Also it can display a "PUNISH" message when landing a hit on an opponent either after blocking their hit or when they're in a recovery portion of a move.  
 Also it can change the FPS in Training Mode.  
 The mod can optionally hide its output from OBS recording (can be turned on in 'UI - Settings - General Settings - Dodge OBS Recording').  
-Includes Hitbox Editor that can save/load edited hitboxes to/from .collision and .json files.  
+Includes Hitbox Editor that can save/load edited hitboxes to/from .collision and .json files. Can load bbscript and .collision mods for both online and offline matches.  
 Can speed up replay playback.  
 Has Quick Character Select popup for 'Player Match' online mode (no default hotkey, need to assign one in 'Settings - Keyboard Shortcuts').
 
@@ -2232,3 +2232,6 @@ This won't affect existing users who update the mod (if they ever changed any se
 - 2026 May 25: Version 7.32:
 1) Combo Recipe panel can now show the amount of delay that a special was cancelled into from some previous move.
 2) Fixed the "A new (potential) hit starts on this frame" tooltip (with corresponding new-hit-start graphic) being displayed on EVERY projectile frame on the framebar after and including the frame of the second hit. Now new hit graphics and tooltips will only be shown on frames where a new hit starts, not including the very first hit.
+- 2026 June 2: Version 7.33:
+1) Fixed wallstick value on the framebar being incorrect on the frame a hit connects during wallstick.
+2) All code pertaining to the "Dodge OBS Recording" function has been hidden behind a WITH_OBS_DODGING macro that must now be set to a defined value (something that returns positive with #ifdef) in order to include such code in the compilation.

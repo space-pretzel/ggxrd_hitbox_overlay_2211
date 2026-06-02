@@ -98,7 +98,7 @@ ignored_warnings = [
  # comparison between ‘const enum Moves::RamlethalStateName’ and ‘enum Moves::RamlethalStateName2’: info.state == Moves::ram2_loop
  "-Wno-enum-compare",
  
- # trigraph ??) ignored, use -trigraphs to enable: "68 rel(?? ?? ?? ??)" (is it talking about the string literal? Those quotation marks are in a string. How can they possibly mean anything else?)
+ # trigraph ??) ignored, use -trigraphs to enable: "68 rel(?? ?? ?? ??)" (https://www.lysator.liu.se/c/rat/b.html#2-2-1-1)
  "-Wno-trigraphs",
  
  #  the value of ‘INPUTS_ICON_ATLAS_WIDTH’ is not usable in a constant expression: uEnd((float)(x + INPUTS_ICON_SIZE) / INPUTS_ICON_ATLAS_WIDTH),

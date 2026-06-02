@@ -2565,7 +2565,9 @@ void UI::drawSearchableWindows() {
 				intSettingPreset(settings.globalWindowTransparency, 0, 5, 20, 80.F, 100);
 				booleanSettingPreset(settings.outlineAllWindowText);
 				
+				#ifdef WITH_OBS_DODGING
 				booleanSettingPreset(settings.dodgeObsRecording);
+				#endif
 				
 				booleanSettingPreset(settings.showYrcWindowsInCancelsPanel);
 				
@@ -10803,7 +10805,12 @@ int printInputs(char* buf, size_t bufSize, const InputType* inputs) {
 bool UI::needShowFramebar() const {
 	if (settings.showFramebar
 			&& (!settings.closingModWindowAlsoHidesFramebar || windowShowMode != WindowShowMode_None)
-			&& !(drawingPostponed && pauseMenuOpen)
+			&& !(
+				#ifdef WITH_OBS_DODGING
+				drawingPostponed &&
+				#endif
+				pauseMenuOpen
+			)
 			&& !gifMode.gifModeToggleHudOnly && !gifMode.gifModeOn
 			&& !gifMode.mostModDisabled) {
 		GameMode mode = game.getGameMode();

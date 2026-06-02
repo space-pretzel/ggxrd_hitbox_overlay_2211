@@ -113,7 +113,9 @@ public:
 	bool isDisplayingOnTop = false;
 	bool drewFramebar = false;
 	bool drewFrameTooltip = false;
+	#ifdef WITH_OBS_DODGING
 	bool drawingPostponed = false;
+	#endif
 	bool needSplitFramebar = false;
 	void getFramebarDrawData(std::vector<BYTE>& dData);
 	std::vector<BYTE> framebarTooltipDrawDataCopy;

@@ -3597,8 +3597,10 @@ void DrawBoxesRenderCommand::Destructor(BOOL freeMem) noexcept {
 // Runs on the main thread
 DrawBoxesRenderCommand::DrawBoxesRenderCommand() {
 	drawData.clear();
+	#ifdef WITH_OBS_DODGING
 	drawingPostponed = endScene.drawingPostponed();
 	obsStoppedCapturing = endScene.obsStoppedCapturing;
+	#endif
 	endScene.drawDataPrepared.copyTo(&drawData);
 	if (!endScene.needDrawInputs && !endScene.requestedInputHistoryDraw) {
 		for (int i = 0; i < 2; ++i) {
@@ -3669,8 +3671,10 @@ UiOrFramebarDrawData::UiOrFramebarDrawData(bool calledFromDrawOriginPointsRender
 		&openParenthesis,
 		&closeParenthesis,
 		digit);
+	#ifdef WITH_OBS_DODGING
 	drawingPostponed = endScene.drawingPostponed();
 	obsStoppedCapturing = endScene.obsStoppedCapturing;
+	#endif
 	if (endScene.queueingFramebarDrawCommand && endScene.uiWillBeDrawnOnTopOfPauseMenu) {
 		ui.getFramebarDrawData(drawData);
 	} else {
@@ -3716,11 +3720,13 @@ void EndScene::REDAnywhereDispDrawHook(void* canvas, FVector2D* screenSize) {
 	bool drawBoxesEnqueued = false;
 	bool needEnqueueOriginPoints = false;
 	willEnqueueAndDrawOriginPoints = false;
+	#ifdef WITH_OBS_DODGING
 	endSceneAndPresentHooked = graphics.endSceneAndPresentHooked;
 	obsStoppedCapturing = graphics.obsStoppedCapturing;
+	bool drawingPostponedLocal;
+	#endif
 	pauseMenuOpen = false;
 	uiWillBeDrawnOnTopOfPauseMenu = false;
-	bool drawingPostponedLocal;
 	needEnqueueUiWithPoints = false;
 	if (!shutdown && !graphics.shutdown && *game.gameDataPtr) {
 		if (!game.isTrainingMode() && game.getGameMode() != GAME_MODE_REPLAY || !*aswEngine) {
@@ -3749,12 +3755,20 @@ void EndScene::REDAnywhereDispDrawHook(void* canvas, FVector2D* screenSize) {
 			}
 			uiWillBeDrawnOnTopOfPauseMenu = true;
 		}
+		#ifdef WITH_OBS_DODGING
 		drawingPostponedLocal = drawingPostponed();
+		#endif
 		if (!shutdown && !graphics.shutdown) {
 			ui.drawData = nullptr;
 			ui.pauseMenuOpen = pauseMenuOpen;
+			#ifdef WITH_OBS_DODGING
 			ui.drawingPostponed = drawingPostponedLocal;
-			ui.needSplitFramebar = uiWillBeDrawnOnTopOfPauseMenu && !drawingPostponedLocal && pauseMenuOpen && ui.isVisibleAnything();
+			#endif
+			ui.needSplitFramebar = uiWillBeDrawnOnTopOfPauseMenu
+				#ifdef WITH_OBS_DODGING
+				&& !drawingPostponedLocal
+				#endif
+				&& pauseMenuOpen && ui.isVisibleAnything();
 			ui.needShowFramebarCached = ui.needShowFramebar();
 			ui.needUpdateGraphicsFramebarTexture = false;
 			ui.prepareDrawData();
@@ -3765,7 +3779,10 @@ void EndScene::REDAnywhereDispDrawHook(void* canvas, FVector2D* screenSize) {
 			needEnqueueUiWithPoints = *aswEngine
 				&& ui.drawData
 				&& (!uiWillBeDrawnOnTopOfPauseMenu || ui.drewFramebar && ui.needSplitFramebar)
-				&& !drawingPostponedLocal;
+				#ifdef WITH_OBS_DODGING
+				&& !drawingPostponedLocal
+				#endif
+				;
 		}
 		if (needEnqueueUiWithPoints) {
 			needEnqueueOriginPoints = true;
@@ -3777,7 +3794,10 @@ void EndScene::REDAnywhereDispDrawHook(void* canvas, FVector2D* screenSize) {
 							!settings.dontShowBoxes && !drawDataPrepared.points.empty()
 							|| (drawDataPrepared.inputsSize[0] || drawDataPrepared.inputsSize[1])
 							&& !requestedInputHistoryDraw
-						) && !drawingPostponedLocal
+						)
+						#ifdef WITH_OBS_DODGING
+						&& !drawingPostponedLocal
+						#endif
 				) {
 					needEnqueueOriginPoints = true;
 				}
@@ -3828,15 +3848,24 @@ void EndScene::REDAnywhereDispDrawHook(void* canvas, FVector2D* screenSize) {
 			queueOriginPointDrawingDummyCommandAndInitializeIcon();
 		}
 		finishedSigscanning();
-	} else {
+	}
+	#ifdef WITH_OBS_DODGING
+	else {
 		drawingPostponedLocal = drawingPostponed();
 	}
+	#endif
 	queueingFramebarDrawCommand = false;
 	orig_REDAnywhereDispDraw(canvas, screenSize);  // calls asmhooks
 	queueingFramebarDrawCommand = false;
 	
 	if (!shutdown && !graphics.shutdown && *game.gameDataPtr
-			&& (uiWillBeDrawnOnTopOfPauseMenu || drawingPostponedLocal)) {
+			&& (
+				uiWillBeDrawnOnTopOfPauseMenu
+				#ifdef WITH_OBS_DODGING
+				|| drawingPostponedLocal
+				#endif
+			)
+	) {
 		FCanvas_Flush(canvas, 0);  // for things to be drawn on top of anything drawn so far, need to flush canvas, otherwise some
 		                           // items might still be drawn on top of yours
 		enqueueRenderCommand<DrawImGuiRenderCommand>();
@@ -3904,11 +3933,15 @@ void EndScene::executeDrawBoxesRenderCommand(DrawBoxesRenderCommand* command) {
 	graphics.staticFontOpenParenthesis = command->openParenthesis;
 	graphics.staticFontCloseParenthesis = command->closeParenthesis;
 	memcpy(graphics.staticFontDigit, command->digit, sizeof graphics.staticFontDigit);
+	#ifdef WITH_OBS_DODGING
 	graphics.endSceneIsAwareOfDrawingPostponement = command->drawingPostponed;
 	graphics.obsStoppedCapturingFromEndScenesPerspective = command->obsStoppedCapturing;
+	#endif
 	graphics.inputHistoryIsSplitOut = command->inputHistoryIsSplitOut;
+	#ifdef WITH_OBS_DODGING
 	if (command->drawingPostponed) return;
 	if (graphics.drawingPostponed()) return;
+	#endif
 	graphics.noNeedToDrawPoints = command->noNeedToDrawPoints;  // drawing points may also draw inputs
 	graphics.executeBoxesRenderingCommand(getDevice());
 	graphics.noNeedToDrawPoints = false;
@@ -3921,8 +3954,11 @@ void EndScene::executeDrawOriginPointsRenderCommand(DrawOriginPointsRenderComman
 	command->uiOrFramebarDrawData.applyFramebarTexture();
 	
 	bool hasFramebarDrawData = !command->uiOrFramebarDrawData.drawData.empty()
+		#ifdef WITH_OBS_DODGING
 		&& !command->uiOrFramebarDrawData.drawingPostponed
-		&& !graphics.drawingPostponed();
+		&& !graphics.drawingPostponed()
+		#endif
+		;
 	
 	if (settings.dontShowBoxes
 			&& !(
@@ -3932,8 +3968,10 @@ void EndScene::executeDrawOriginPointsRenderCommand(DrawOriginPointsRenderComman
 			&& !hasFramebarDrawData) return;
 	
 	if (hasFramebarDrawData) {
+		#ifdef WITH_OBS_DODGING
 		graphics.endSceneIsAwareOfDrawingPostponement = command->uiOrFramebarDrawData.drawingPostponed;
 		graphics.obsStoppedCapturingFromEndScenesPerspective = command->uiOrFramebarDrawData.obsStoppedCapturing;
+		#endif
 		graphics.uiFramebarDrawData = command->uiOrFramebarDrawData.drawData;
 		graphics.uiNeedsFramesTextureFramebar = command->uiOrFramebarDrawData.needsFramesTextureFramebar;
 		graphics.uiNeedsFramesTextureHelp = command->uiOrFramebarDrawData.needsFramesTextureHelp;
@@ -4042,6 +4080,7 @@ void EndScene::executeDrawImGuiRenderCommand(DrawImGuiRenderCommand* command) {
 	//if (!graphics.canDrawOnThisFrame()) return;
 	
 	IDirect3DTexture9* tex = getTextureFromUTexture2D(command->uiOrFramebarDrawData.iconsUTexture2D);
+	#ifdef WITH_OBS_DODGING
 	graphics.endSceneIsAwareOfDrawingPostponement = command->uiOrFramebarDrawData.drawingPostponed;
 	graphics.obsStoppedCapturingFromEndScenesPerspective = command->uiOrFramebarDrawData.obsStoppedCapturing;
 	if (command->uiOrFramebarDrawData.drawingPostponed) {
@@ -4059,6 +4098,7 @@ void EndScene::executeDrawImGuiRenderCommand(DrawImGuiRenderCommand* command) {
 	if (graphics.drawingPostponed()) {
 		return;
 	}
+	#endif
 	ui.onEndScene(getDevice(), command->uiOrFramebarDrawData.drawData.data(), tex,
 		command->uiOrFramebarDrawData.needsFramesTextureFramebar,
 		command->uiOrFramebarDrawData.needsFramesTextureHelp);
@@ -4670,7 +4710,10 @@ bool EndScene::willDrawOriginPoints() {
 				|| needEnqueueUiWithPoints
 			)
 			&& !gifMode.modDisabled
-			&& !drawingPostponed();
+			#ifdef WITH_OBS_DODGING
+			&& !drawingPostponed()
+			#endif
+			;
 }
 
 void EndScene::collectFrameCancelsPart(PlayerInfo& player, std::vector<GatlingOrWhiffCancelInfo>& vec, const AddedMoveData* move,
@@ -5420,9 +5463,11 @@ void EndScene::onAfterDealHit(Entity defenderPtr, Entity attackerPtr) {
 	}
 }
 
+#ifdef WITH_OBS_DODGING
 bool EndScene::drawingPostponed() const {
 	return settings.dodgeObsRecording && endSceneAndPresentHooked && !obsStoppedCapturing;
 }
+#endif
 
 #ifdef LOG_PATH
 bool loggedDrawingInputsOnce = false;

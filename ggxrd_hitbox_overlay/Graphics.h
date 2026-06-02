@@ -78,6 +78,7 @@ public:
 	bool noNeedToDrawPoints = false;  // this will also affect drawing of inputs that are drawn together with points
 	bool needDrawFramebarWithPoints = false;
 	
+	#ifdef WITH_OBS_DODGING
 	Present_t orig_present = nullptr;
 	BeginScene_t orig_beginScene = nullptr;
 	bool endSceneAndPresentHooked = false;
@@ -89,6 +90,7 @@ public:
 	//HandleWrapper responseToImInDanger = NULL;
 	bool canDrawOnThisFrame() const;
 	bool drawingPostponed() const;
+	#endif
 	std::vector<BYTE> uiFramebarDrawData;
 	std::vector<BYTE> uiDrawData;
 	bool uiNeedsFramesTextureFramebar = false;
@@ -103,9 +105,11 @@ public:
 	void executeBoxesRenderingCommand(IDirect3DDevice9* device);
 	bool dontShowBoxes = false;
 	IDirect3DTexture9* iconsTexture = nullptr;
+	#ifdef WITH_OBS_DODGING
 	bool endSceneIsAwareOfDrawingPostponement = false;
 	bool obsDisappeared = false;
 	bool obsReappeared = false;
+	#endif
 	bool onlyDrawInputHistory = false;
 	bool inputHistoryIsSplitOut = false;  // if true, inputs must only be drawn using a dedicated FRenderCommand and nowhere else
 	static int getSin(int degrees);  // degrees - angle in degrees multiplied by 10 (for ex. 0-3600). Returns result from -1000 to 1000

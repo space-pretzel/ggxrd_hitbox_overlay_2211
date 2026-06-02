@@ -434,7 +434,11 @@ void EndScene::prepareDrawDataInside() {
 						player.wallstickElapsed = 0;
 					}
 					player.displayWallstick = true;
-					player.wallstick = ent.received()->wallstickDuration + 1 - ent.bbscrvar();
+					if (ent.received()->wallstickDuration == 0) {  // becomes 0 on hit, despite still being in the wallslump animation
+						player.wallstick = player.wallstickMax - 30 + 1 + 1 - ent.bbscrvar();
+					} else {
+						player.wallstick = ent.received()->wallstickDuration + 1 - ent.bbscrvar();
+					}
 				} else {
 					player.wallstick = 0;
 				}
